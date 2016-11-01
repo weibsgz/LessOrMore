@@ -1,13 +1,13 @@
 # Site settings
-name: Less Or More
-email: luoyan35714@126.com
-author: Freud Kang
-url: http://www.hifreud.com
-resume_site: http://www.hifreud.com/Resume.io/
-github: https://github.com/luoyan35714/
+name: 学无止境
+email: weibsgz@126.com
+author: Wei Bin
+url: https://weibsgz.github.io/LessOrMore/
+resume_site: https://weibsgz.github.io/LessOrMore/
+github: https://github.com/weisgz/
 baseurl: "/LessOrMore"
-description: Actually, less is more!
-meta_description: 康志华;个人博客;学而不思则罔;思而不学则殆;生命不止;折腾不休
+description: ~~~~~~~~~~!
+meta_description: 魏彬;个人博客;学而不思则罔;思而不学则殆;生命不止;折腾不休
 motto: It's our wits that make us men.
 banner: 学而不思则罔，思而不学则殆。
 
@@ -29,7 +29,7 @@ FB:
     duoshuo:
         short_name : luoyan35714
     disqus :
-        short_name : freudkang
+        short_name : weibsgz
     # facebook :
     #   appid : 123
     #   num_posts: 5
