@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  test
-date:   2016-11-01 20:05:00 +0800
+title:  jeyll入门搭建
+date:   2016-11-01 20:15:00 +0800
 categories: 随笔
 tag: interview
 ---
