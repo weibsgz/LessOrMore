@@ -2,8 +2,8 @@
 layout: post
 title:  css sprite工具
 date:   2015-12-27 01:08:00 +0800
-categories: document
-tag: 教程
+categories: 工具
+tag: 工具
 ---
 
 * content

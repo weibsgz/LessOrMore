@@ -2,8 +2,8 @@
 layout: post
 title:  jeyll入门搭建
 date:   2016-11-01 20:15:00 +0800
-categories: 随笔
-tag: interview
+categories: 教程
+tag: 教程
 ---
 
 * content
