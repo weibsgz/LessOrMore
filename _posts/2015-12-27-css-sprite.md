@@ -9,7 +9,7 @@ tag: 教程
 * content
 {:toc}
 
-此软件简单易用，同事提供，感谢  [css sprite](http://lesscss.cn/)
+此软件简单易用，同事提供，感谢  [css sprite](https://github.com/weibsgz/LessOrMore/blob/gh-pages/libs/CssSprite.exe)
 
 
 
