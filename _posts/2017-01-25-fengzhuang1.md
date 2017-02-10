@@ -89,6 +89,96 @@ HTML
         right: 0;
         top: 0
     }
+    /*loading动画*/
+    
+    .loadDiv {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        -webkit-transform: translate(-50%, -50%);
+        background-color: #fff;
+        z-index: 10000;
+        color: #fff;
+        line-height: 40px;
+        padding: 0 10px 0 10px;
+        border-radius: 3px;
+        white-space: nowrap;
+        background-color: rgba(0, 0, 0, 0.5);
+        text-align: center;
+        min-width: 80px;
+    }    
+  
+    
+    .ldGif {
+        position: absolute;
+        left: 10px;
+        top: 5px;
+    }
+    
+    @-webkit-keyframes line-scale {
+        0% {
+            -webkit-transform: scaley(1);
+            transform: scaley(1);
+        }
+        50% {
+            -webkit-transform: scaley(0.4);
+            transform: scaley(0.4);
+        }
+        100% {
+            -webkit-transform: scaley(1);
+            transform: scaley(1);
+        }
+    }
+    
+    @keyframes line-scale {
+        0% {
+            -webkit-transform: scaley(1);
+            transform: scaley(1);
+        }
+        50% {
+            -webkit-transform: scaley(0.4);
+            transform: scaley(0.4);
+        }
+        100% {
+            -webkit-transform: scaley(1);
+            transform: scaley(1);
+        }
+    }
+    
+    .line-scale > div:nth-child(1) {
+        -webkit-animation: line-scale 1s 0.1s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+        animation: line-scale 1s 0.1s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+    }
+    
+    .line-scale > div:nth-child(2) {
+        -webkit-animation: line-scale 1s 0.2s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+        animation: line-scale 1s 0.2s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+    }
+    
+    .line-scale > div:nth-child(3) {
+        -webkit-animation: line-scale 1s 0.3s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+        animation: line-scale 1s 0.3s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+    }
+    
+    .line-scale > div:nth-child(4) {
+        -webkit-animation: line-scale 1s 0.4s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+        animation: line-scale 1s 0.4s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+    }
+    
+    .line-scale > div:nth-child(5) {
+        -webkit-animation: line-scale 1s 0.5s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+        animation: line-scale 1s 0.5s infinite cubic-bezier(0.32, 0.96, 0.18, 1.08);
+    }
+    
+    .line-scale > div {
+        background-color: #fff;
+        width: 4px;
+        height: 25px;
+        border-radius: 2px;
+        margin: 2px;
+        display: inline-block;
+    }
     </style>
 </head>
 
@@ -101,7 +191,13 @@ HTML
     <div class="content">1111
         <button id="tcBtn">弹出层</button>
     </div>
-    <div class="content" style="display: none;">2222</div>
+    <div class="content" style="display: none;">
+        <button id="loadingBtn">loading</button>
+        <button id="hideLoadingBtn">hide</button>
+        <div id="loading-wrapper" style="width: 500px; height: 500px; border:1px solid #ccc;">
+            22222222222222222222222222
+        </div>
+    </div>
     <div class="content" style="display: none;">3333</div>
     <div id="dialg">
         <p>弹出层自己写</p>
@@ -115,11 +211,52 @@ HTML
             $(el).addClass(className).siblings().removeClass(className);
             $(content).eq(index).show().siblings(content).hide()
         }
-        var tc = function(containerId) {
-            
+       /* var tc = function(containerId) {
+            mengceng('body');
+            $(containerId).show();
+            $(containerId).css({
+                    "position": "absolute",
+                    "left": "0",
+                    "top": "0",
+                    "bottom": "0",
+                    "right": "0",
+                    "margin": "auto"
+                })                
+        }*/
+
+        var tc= {
+            init:function(containerId){
+                mengceng('body');
+                $(containerId).show();
+                $(containerId).css({
+                    "position": "absolute",
+                    "left": "0",
+                    "top": "0",
+                    "bottom": "0",
+                    "right": "0",
+                    "margin": "auto"
+                })
+            },
+            closeTc:function(containerId){
+                 $("#mengceng").remove();
+                $(containerId).hide()
+            }
+        }
+
+
+
+
+
+        var mengceng = function(dom) {
             if (document.getElementById('mengceng') === null) {
                 var maskHtml = '<div id="mengceng"></div>';
-                $("body").append(maskHtml);
+                if(dom){
+                    $(dom).append(maskHtml)
+                }
+                else{
+                    $("body").append(maskHtml); 
+                }
+               
                 $("#mengceng").css({
                     "background-color": "#000",
                     "width": "100%",
@@ -130,34 +267,67 @@ HTML
                     "top": "0",
                     "opacity": "0.6"
                 });
+            } else {
+                $("#mengceng").show()
             }
-            else{
-              $("#mengceng").show()
-            }
-
-
-
-            $(containerId).show();
-            $(containerId).css({
-                    "position": "absolute",
-                    "left": "0",
-                    "top": "0",
-                    "bottom": "0",
-                    "right": "0",
-                    "margin": "auto"
-                })
-                /*$("body").append(function(i,html){
-                   return $(containerId).html();
-                });*/
         }
-        var closeTc = function(containerId) {
-            $("#mengceng").hide();
+
+
+       /* var closeTc = function(containerId) {
+            $("#mengceng").remove();
             $(containerId).hide()
+        }*/
+
+        var Loading = function(el, config) {
+            var defaults = {
+                msg: '数据加载中,请稍后',
+                mask: true,
+                img: true,
+                el: $(el),
+                callback: function() {
+                    alert(1)
+                }
+            };
+            this.config = $.extend(defaults, config);
         }
+
+        Loading.prototype = {
+            init: function() {
+                console.log(this.config)
+                var loadDiv = $("<div class='loadDiv'>" + this.config.msg + "</div>");
+                this.config.el.css("position", "relative");
+                this.config.el.append(loadDiv);
+                if (this.config.mask) {
+                    mengceng(this.config.el);
+                }
+
+                if (this.config.img) {
+                    var img = $("<div class='loader-inner line-scale'>" +
+                        "<div></div>" +
+                        "<div></div>" +
+                        "<div></div>" +
+                        "<div></div>" +
+                        "<div></div>" +
+                        "</div>");
+                    this.config.el.find('.loadDiv').append(img);
+                } else {
+                    var img = $("<div class='loadingGif'><img src='loading2.gif' width='80' /></div>");
+                    this.config.el.find('.loadDiv').append(img);
+                }
+
+            },
+            destroy:function(){
+                $("#mengceng").remove();
+                $(".loadDiv").remove()
+            }
+        }
+
+
+
         return {
             tab: tab,
-            tc: tc,
-            closeTc: closeTc
+            tc: tc,           
+            loading: Loading
         }
     })();
 
@@ -167,16 +337,29 @@ HTML
         })
 
         $("#tcBtn").on("click", function() {
-            Util.tc("#dialg")
+            Util.tc.init("#dialg")
         })
 
         $(".close").on("click", function() {
-            Util.closeTc("#dialg")
+            Util.tc.closeTc("#dialg")
         })
+
+
+        var load = new Util.loading("#loading-wrapper",{
+                msg:'123'
+            });
+        $("#loadingBtn").on("click", function() {            
+            load.init()
+        })
+
+        $("#hideLoadingBtn").on("click",function(){
+            load.destroy()
+        })  
     })
     </script>
 </body>
 
 </html>
+
 
 {% endhighlight %}
