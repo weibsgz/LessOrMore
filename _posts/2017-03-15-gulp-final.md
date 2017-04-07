@@ -18,40 +18,35 @@ gulpfile.js的配置
 
 {% highlight bash %}
 /**
- * Created by ly on 2016/12/5.
+ * Created by halfmoon on 2017/04/01.
  */
-//导入工具包 require('node_modules里对应模块')
-var gulp = require('gulp'); //本地安装gulp所用到的地方
-var fileinclude  = require('gulp-file-include');  //包含HTML
-var connect = require('gulp-connect'); //本地服务
-var imagemin = require('gulp-imagemin'); //图片压缩
-var watch = require('gulp-watch'); //监听
-var less = require('gulp-less');
-var sass = require('gulp-sass');
-var notify = require('gulp-notify');  //处理LESS错误
-var plumber = require('gulp-plumber'); //处理LESS错误
-var postcss = require('gulp-postcss'); // css 兼容
-var autoprefixer = require('autoprefixer'); // 处理浏览器私有前缀
-var cssnext = require('cssnext'); // 使用CSS未来的语法
-var precss = require('precss'); // 像Sass的函数
+// 导入工具包 require('node_modules里对应模块')
+var gulp = require('gulp');                        // 本地安装gulp所用到的地方
+var fileinclude  = require('gulp-file-include');   // 包含HTML
+var connect = require('gulp-connect');             // 本地服务
+var imagemin = require('gulp-imagemin');           // 图片压缩
+var watch = require('gulp-watch');                 // 监听
+var less = require('gulp-less');                   // 编译less
+var sass = require('gulp-sass');                   // 编译sass
+var notify = require('gulp-notify');               // 处理LESS错误
+var plumber = require('gulp-plumber');             // 构建异常捕获，防止构建进程崩掉
+var postcss = require('gulp-postcss');             // css 兼容
+var autoprefixer = require('autoprefixer');        // 处理浏览器私有前缀
+var cssnext = require('cssnext');                  // 使用CSS未来的语法
+var precss = require('precss');                    // 像Sass的函数
+var spritesmith = require('gulp.spritesmith');     // 精灵图片
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
-var minifycss = require('gulp-minify-css');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-var cached = require('gulp-cached');
-var remember = require('gulp-remember');
-var changed = require('gulp-changed');
+var minifycss = require('gulp-minify-css');        // 压缩css
+var concat = require('gulp-concat');               // 合并文件
+var babel = require('gulp-babel');                 // 将ES6代码编译成ES5
+var uglify = require('gulp-uglify');               // 压缩js                       
+var rename = require('gulp-rename');               // 重命名文件
+var cached = require('gulp-cached');               // 文件缓存进内存
+var remember = require('gulp-remember');           // 读取内存中的文件
+var changed = require('gulp-changed');             // 比较文件改变
+var gutil   = require('gulp-util');                // 让电脑 哔 ~ 的响一声然后抛出异常
 var debug = require('gulp-debug');
-// .pipe(debug({title: 'translate...:'}))
-/*//本地服务
- gulp.task('webserver', function() {
- connect.server({
- port: 8080,      //修改端口
- livereload: true   //添加实时刷新，需要watch相应的css.js,html文件
- });
- });*/
 
 //include html并刷新服务器
 gulp.task('fileinclude', function(done) {
@@ -63,85 +58,104 @@ gulp.task('fileinclude', function(done) {
             basepath: '@file'
         }))
         .pipe(gulp.dest('dist/html'))
-
         .on('end', done)
         .pipe(reload({ stream: true }));
 });
 
-//压缩图片
-gulp.task('imagemin', function() {
-    gulp.src('src/images/*')
-        // 如果想对变动过的文件进行压缩，则使用下面一句代码
-        .pipe(cached(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true })))
-        .pipe(debug({title: 'translate...:'}))
-        .pipe(gulp.dest('dist/images'))
-        .pipe(reload({ stream: true }));
+// 创建精灵图
+gulp.task('sprite', function() {
+  var spriteData = gulp.src('src/images/sprite/*.png').pipe(spritesmith({
+            imgName: 'sprite.png',
+            cssName: '1_sprite.css',
+            cssFormat: 'css',
+            imgPath: '../images/sprite.png'
+        }));
+    spriteData.img.pipe(gulp.dest('src/images')); // output path for the sprite
+    spriteData.css.pipe(gulp.dest('src/css/css')); // output path for the CSS
 });
 
-//打包CSS进入到dist目录
-gulp.task('csstodist',  ['testLess', 'testSass'], function() {
+// 压缩图片
+gulp.task('imagemin', ['sprite'], function() {
+    var stream = gulp.src('src/images/*.+(png|jpg|jpeg|gif|svg)')
+                // 如果想对变动过的文件进行压缩，则使用下面一句代码
+                .pipe(cached(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true })))
+                .pipe(debug({title: '图片文件————:'}))
+                .pipe(gulp.dest('dist/images'))
+                .pipe(reload({ stream: true }));
+    return stream;
+});
+
+// 打包CSS进入到dist目录
+gulp.task('csstodist',  ['testCSS', 'testLess', 'testSass', 'sprite'], function() {
     var processors = [autoprefixer, cssnext, precss];
-    var stream = gulp.src('src/css/*.css')
+    var stream = gulp.src('src/css/css/*.css')
             .pipe(cached('csstodist'))
             .pipe(postcss(processors))
             .pipe(remember('csstodist'))
-            .pipe(debug({title: 'translate...:'}))
+            .pipe(debug({title: '编译文件————:'}))
             .pipe(concat('common.css'))
-            .pipe(rename({suffix: '.min'}))
-            .pipe(minifycss())
+            // .pipe(rename({suffix: '.min'}))
+            // .pipe(minifycss())
             .pipe(gulp.dest('dist/css'))
             .pipe(reload({ stream: true }));
     return stream;
 });
 
+// css 打包进入 src 文件夹
+gulp.task('testCSS', function (callback) {
+    gulp.src('src/css/*.css')
+        // .pipe(cached('testLess'))
+        .pipe(changed('src/css/css'))
+        .pipe(gulp.dest('src/css/css'));
+        callback();
+        // .pipe(reload({ stream: true }));
+});
+
+// less 翻译 并 打包进入 src 文件
 gulp.task('testLess', function (callback) {
     gulp.src('src/css/*.less')
         // .pipe(cached('testLess'))
-        .pipe(changed('testLess', {extension: '.css'}))
-        .pipe(plumber({errorHandler: notify.onError('Error: <%= error.message %>')}))
+        .pipe(changed('src/css/css', {extension: '.css'}))
+        .pipe(plumber( {errorHandler: notify.onError('Error: <%= error.message %>')}))
         .pipe(less())
-        // .pipe(debug({title: 'translate...:'}))
-        // .pipe(remember('testLess'))
-        // .pipe(concat('common_less.css'))
-        // .pipe(rename({suffix: '.min'}))
-        // .pipe(minifycss())
-        .pipe(gulp.dest('src/css'));
+        .pipe(gulp.dest('src/css/css'));
         callback();
         // .pipe(reload({ stream: true }));
 });
 
+// sass 翻译 并 打包进入 src 文件
 gulp.task('testSass', function (callback) {
     gulp.src('src/css/*.scss')
-        // .pipe(cached('testLess'))
-        .pipe(changed('testSass', {extension: '.css'}))
-        .pipe(sass().on('error', sass.logError))
-        // .pipe(debug({title: 'translate...:'}))
-        // .pipe(remember('testLess'))
-        // .pipe(concat('common_less.css'))
-        // .pipe(rename({suffix: '.min'}))
-        // .pipe(minifycss())
-        .pipe(gulp.dest('src/css'));
+        .pipe(changed('src/css/css', {extension: '.css'}))
+        .pipe(plumber({errorHandler: notify.onError('Error: <%= error.message %>')}))
+        // .pipe(sass().on('error', sass.logError))
+        .pipe(sass())
+        .pipe(debug({title: '编译文件————:'}))
+        .pipe(gulp.dest('src/css/css'));
         callback();
         // .pipe(reload({ stream: true }));
 });
 
-//打包Lib进入到dist目录
+// 打包Lib进入到dist目录
 gulp.task('Libtodist', function() {
     gulp.src('src/Lib/**/*')
-        // .pipe(changed('dist/Lib'))
         .pipe(cached('Libtodist'))
-        .pipe(debug({title: 'translate...:'}))
+        .pipe(debug({title: 'LIB复制文件————:'}))
         .pipe(gulp.dest('dist/Lib'))
         .pipe(reload({ stream: true }));
 });
 
-//打包JS到dist目录
+// 打包JS到dist目录
 gulp.task('jstodist', function() {
     gulp.src('src/js/**/*.js')
-        // .pipe(cached('jstodist'))
+        .pipe(plumber({ errHandler: function (e) {
+            gutil.beep(); // 哔~ 的响一声
+            gutil.log(e); // 抛出异常
+        }}))
+        .pipe(changed('dist/js', {hasChanged: changed.compareSha1Digest}))
+        .pipe(babel({ presets: ['es2015'] }))
+        .pipe(debug({title: '编译文件————:'}))
         // .pipe(remember('jstodist'))
-        .pipe(changed('dist/js'))
-        .pipe(debug({title: 'translate...:'}))
         // .pipe(concat('public.js'))
         // .pipe(rename({suffix: '.min'}))
         // .pipe(uglify())
@@ -149,56 +163,31 @@ gulp.task('jstodist', function() {
         .pipe(reload({ stream: true }));
 });
 
-
-//打包JS到dist目录
-// gulp.task('jscatdist', function() {
-//     gulp.src('src/js/*.cat.js')
-//         // .pipe(cached('jstodist'))
-//         // .pipe(remember('jstodist'))
-//         .pipe(debug({title: 'translate...:'}))
-//         // .pipe(concat('public.js'))
-//         .pipe(rename({suffix: '.min'}))
-//         .pipe(uglify())
-//         .pipe(gulp.dest('dist/js'))
-//         .pipe(reload({ stream: true }));
-// });
-
-
-gulp.task('copyJson', function () {
-    gulp.src('src/geoJson/*.*')
-
-        .pipe(gulp.dest('dist/geoJson')).pipe(reload({ stream: true }));
-});
-
-
 // 监视文件改动并重新载入
 gulp.task('serve', function() {
     browserSync({
-        port: 315,
-        server: {
-            baseDir: 'dist/'
+            port: 406,
+            server: {
+                baseDir: 'dist/'
         }
     });
 });
 
-//监听所有HTML JS CSS改动
+// 监听所有HTML JS CSS改动
 gulp.task('watch', function () {
-   // gulp.watch(['src/css/*','src/css/*.less','src/html/*.html','src/js/*','src/images/*'], ['testLess','jstodist','csstodist','fileinclude','imagemin']);
+    gulp.watch(['src/css/*.css'], ['testCSS']);
     gulp.watch(['src/css/*.less'], ['testLess']);
     gulp.watch(['src/css/*.scss'], ['testSass']);
-    gulp.watch(['src/css/*.css'], ['csstodist']);
+    gulp.watch(['src/css/css/*.css'], ['csstodist']);
+    gulp.watch(['src/images/sprite/*'], ['sprite']);
     gulp.watch(['src/Lib/**/*'], ['Libtodist']);
-    // gulp.watch(['src/js/public.js'], ['jstodist']);
     gulp.watch(['src/js/*.js'], ['jstodist']);
     gulp.watch(['src/html/**/*.html'], ['fileinclude']);
     gulp.watch(['src/images/*'], ['imagemin']);
-    gulp.watch(['src/geoJson/*'], ['copyJson']);
 });
 
+gulp.task('default',['csstodist','fileinclude','serve', 'imagemin','Libtodist','jstodist','watch']);
 
-
-
-gulp.task('default',['csstodist','fileinclude','serve','imagemin','Libtodist','jstodist', 'copyJson','watch']);
 
 {% endhighlight %}
 
@@ -220,10 +209,12 @@ package.json的配置
   "license": "ISC",
   "devDependencies": {
     "autoprefixer": "^6.7.6",
+    "babel-core": "^6.24.0",
+    "babel-preset-es2015": "^6.24.0",
     "browser-sync": "^2.17.3",
     "cssnext": "^1.8.4",
     "gulp": "^3.9.1",
-    "gulp-cache": "^0.4.5",
+    "gulp-babel": "^6.1.2",
     "gulp-cached": "^1.1.1",
     "gulp-changed": "^2.0.0",
     "gulp-concat": "^2.6.1",
@@ -240,7 +231,9 @@ package.json的配置
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^3.1.0",
     "gulp-uglify": "^2.0.1",
+    "gulp-util": "^3.0.8",
     "gulp-watch": "^4.3.10",
+    "gulp.spritesmith": "^6.3.0",
     "precss": "^1.4.0"
   }
 }
