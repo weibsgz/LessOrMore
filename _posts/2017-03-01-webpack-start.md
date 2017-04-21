@@ -53,6 +53,7 @@ npm run webpack 运行
 
 html-webpack-plugin
 ====================================
+{% highlight bash %}
 npm install html-webpack-plugin --save-dev
 var htmlWebpackPlugin = require('html-webpack-plugin')
 
